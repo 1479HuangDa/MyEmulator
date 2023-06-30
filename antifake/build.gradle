@@ -1,0 +1,75 @@
+apply plugin: 'com.android.library'
+apply plugin:'com.kezong.fat-aar'
+
+android {
+    compileSdkVersion 29
+    lintOptions {
+        abortOnError false
+    }
+    defaultConfig {
+        minSdkVersion 21
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        versionName "2.0.7"
+        externalNativeBuild {
+            cmake {
+                version "3.10.2"
+                // 指定编译架构
+                abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'
+            }
+        }
+
+    }
+
+    libraryVariants.all {
+        variant ->
+            variant.outputs.all {
+                if (buildType.name == "release") {
+                    outputFileName = "7w-emulator-${defaultConfig.versionName}.aar"
+                }
+            }
+    }
+
+    buildTypes {
+        release {
+          ndk {
+                abiFilters "arm64-v8a", "armeabi-v7a","x86","x86_64"
+            }
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+
+
+        debug {
+            ndk {
+                abiFilters "arm64-v8a", "armeabi-v7a",'x86',"x86_64"
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            // 在该文件种设置所要编写的c源码位置，以及编译后so文件的名字
+            path 'CMakeLists.txt'
+            version "3.10.2"
+        }
+    }
+
+    sourceSets {
+        main {
+            //jniLibs.srcDir 'src/main/libs'
+            jniLibs.srcDirs = ['libs']
+            java.srcDirs 'src/main/java'
+        }
+    }
+
+
+
+}
+
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    embed project (':telephony')
+}
+
